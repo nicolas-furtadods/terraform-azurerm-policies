@@ -1,8 +1,5 @@
-# DEPRECATED - Azure Function App
+# Azure Policies
 [![Changelog](https://img.shields.io/badge/changelog-release-green.svg)](CHANGELOG.md) [![Notice](https://img.shields.io/badge/notice-copyright-yellow.svg)](NOTICE) [![Apache V2 License](https://img.shields.io/badge/license-Apache%20V2-orange.svg)](LICENSE)
-
-| ⚠ This module is deprecated, please use [function-app](https://registry.terraform.io/modules/claranet/function-app/azurerm/) module |
-|-------------------------------------------------------------------------------------------------------------------------------------|
 
 This Terraform feature creates multiples [Azure Policy](https://docs.microsoft.com/en-us/azure/governance/policy/overview), allowing you to use pre-defined policies, give a list of custom policy files, or use defined policy initiatives like [Azure Security Benchmark](https://docs.microsoft.com/en-us/security/benchmark/azure/overview-v2). Policies deployed will be grouped in initiatives separated by their categories.
 
@@ -41,7 +38,7 @@ module "policies" {
     description = "Initiative set to group policies by category" # Optionnal. Description 
     display_name_prefix = "Azure Policy Governance." # Optionnal. Note that the category key will be appended at the end.
     excluded_scopes = [ ] # Optionnal. Management group, subscriptions, resource groups, resources scopes.
-    identity = {
+    identity = { # Null for easy assignment
       identity_ids = [ "value" ] # Required when type 'UserAssigned' is set. 
       type = "value" # Optionnal. Add an Identity (MSI) to the function app. Possible values are SystemAssigned or UserAssigned"
     }

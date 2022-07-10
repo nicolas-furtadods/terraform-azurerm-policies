@@ -1,5 +1,5 @@
 ##########################################################################
-# 1. Initiatives definition and Assignments
+# 0. Core
 ##########################################################################
 
 variable "management_group_id" {
@@ -11,6 +11,10 @@ variable "location" {
   description = "Region to deploy the resources"
 }
 
+##########################################################################
+# 1. Initiatives definition and Assignments
+##########################################################################
+
 variable "initiatives_parameters" {
   type = object({
     display_name_prefix                    = string       #Initiative names prefix.
@@ -19,7 +23,7 @@ variable "initiatives_parameters" {
     default_policies_non_compliant_message = string       # Default Policy Non compliant message
     identity = object({
       type         = string
-      identity_ids = list(string) #Identity ID
+      identity_ids = list(string)
     })
 
   })
@@ -33,6 +37,10 @@ variable "initiatives_parameters" {
     identity                               = null
   }
 }
+
+##########################################################################
+# 2. Custom Policies
+##########################################################################
 
 variable "custom_policy" {
   type        = map(string)
@@ -52,3 +60,28 @@ variable "custom_policy_non_compliance_messages" {
   default     = {}
 }
 
+##########################################################################
+# 3. Enforce existing policies
+##########################################################################
+variable "predefined_policies" {
+  type = map(object({
+    display_name           = string
+    name                   = string
+    category               = string
+    parameters             = string
+    non_compliance_message = string
+  }))
+  description = "A list of policies to apply on the defined management group. This list will be enforced."
+}
+
+##########################################################################
+# 4. Security Benchmark
+##########################################################################
+
+variable "enable_azure_security_benchmark" {
+  type = object({
+    exemption_reference_list = list(string)
+  })
+  description = "Enable the predefined 'Azure security Benchmark initiative'."
+  default     = null
+}

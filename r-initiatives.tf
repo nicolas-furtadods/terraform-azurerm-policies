@@ -21,13 +21,13 @@ resource "azurerm_policy_set_definition" "general-plcset-def" {
 
   dynamic "policy_definition_reference" {
     for_each = {
-      for k, plc in local.enforced_policies_plus_addition : k => plc if plc.category == each.key
+      for k, plc in local.enforced_policies : k => plc if plc.category == each.key
     }
     iterator = definition
     content {
       policy_definition_id = definition.value.policy_definition_id
-      reference_id         = "az-plcset-general-def-${definition.value.name}"
-      parameter_values     = lookup(var.custom_policy_parameters, definition.key, null)
+      reference_id         = "az-plcset-general-def-${definition.key}"
+      parameter_values     = definition.value.parameters # This is validated in local so no need to check null
     }
   }
 }
@@ -44,12 +44,12 @@ resource "azurerm_management_group_policy_assignment" "general-plcset-assign" {
 
   dynamic "non_compliance_message" {
     for_each = {
-      for k, plc in local.enforced_policies_plus_addition : k => plc if plc.category == each.key
+      for k, plc in local.enforced_policies : k => plc if plc.category == each.key && (plc.category == "Indexed" || plc.category == "All")
     }
     iterator = definition
     content {
-      content                        = lookup(var.custom_policy_non_compliance_messages, definition.key, var.initiatives_parameters.default_policies_non_compliant_message)
-      policy_definition_reference_id = "az-plcset-general-def-${definition.value.name}"
+      content                        = definition.value.non_compliance_message # This is validated in local so no need to check null
+      policy_definition_reference_id = "az-plcset-general-def-${definition.key}"
     }
   }
 
