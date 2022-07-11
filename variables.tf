@@ -85,3 +85,17 @@ variable "enable_azure_security_benchmark" {
   description = "Enable the predefined 'Azure security Benchmark initiative'."
   default     = null
 }
+
+##########################################################################
+# 5. Guest Policies
+##########################################################################
+variable "predefined_guest_policies" {
+  type = map(object({
+    display_name           = string
+    name                   = string
+    category               = string
+    parameters             = string
+    non_compliance_message = string
+  }))
+  description = "A list of policies to apply on the defined management group. This list will be enforced."
+}

@@ -12,9 +12,11 @@ This Terraform feature creates multiples [Azure Policy](https://docs.microsoft.c
 ## Usage
 
 This module is separated between various configuration blocks which depends on your usage.
-1. Global Module Configuration
-2. Initiative Configuration
-3. Custom Policies Configuration
+0. Global Module Configuration
+1. Initiative Configuration
+2. Custom Policies Configuration
+3. Predefined Policies
+4. Azure Security Benchmark
 
 
 ### Global Module Configuration
@@ -69,21 +71,56 @@ module "policies" {
 }
 ```
 
-## Inputs
+### Azure Security Benchmark
+```hcl
+module "policies" {
+  # Previously configured parameters
+  # Global Module Parameters are mandatory
 
-| Name | Description | Type | Default | Required |
-|------|-------------|------|---------|:--------:|
-| custom\_policy.library\_folder  | Mandatory to use custom policies feature. A folder path containing json files | `string` | n/a | no |
-| custom\_policy\_non\_compliance\_messages  | Key-Value Map. Provide non compliance messages to policies requirying it. | `map(string)` | n/a | no |
-| custom\_policy\_parameters  | Key-Value Map. Provide parameters to policies requirying parameters. Key is the policy name. Value should be a JSON string of the policy parameters. | `map(string)` | n/a | no |
-| initiatives\_parameters.default\_policies\_non\_compliant\_message | Default non compliant message | `string` | `Your deployment or action is not compliant with your organization policies [...]`| no |
-| initiatives\_parameters.description | Initiative Description | `string` | `Initiative set to group policies by category`| no |
-| initiatives\_parameters.display\_name\_prefix | Initiative names prefix. | `string` | `Azure Policy Governance -`| no |
-| initiatives\_parameters.excluded\_scopes  | Optionnal. Management group, subscriptions, resource groups, resources scopes. | `string` | n/a| no |
-| initiatives\_parameters.identity.identity_ids | List of Managed Identity IDs. | `list(string)` | n/a | no |
-| initiatives\_parameters.identity.type | Possible values are SystemAssigned or UserAssigned" | `string` | n/a | no |
-| location | The management group ID. Region to deploy the resources | `string` | n/a | yes |
-| management\_group\_id | The management group ID. Most resources will be created on its scope | `string` | n/a | yes |
+  # Mandatory to use custom policies.
+  # Add the object 'enable_azure_security_benchmark' to implement the initiative
+  enable_azure_security_benchmark = {
+    exemption_reference_list = [ 
+      "AzureFirewallEffect"
+    ]
+  }
+}
+```
+## Arguments Reference
+
+The following arguments are supported:
+  - `management_group_id` - (Required) The management group ID. Most resources will be created on its scope.
+  - `location` - (Required) Region to deploy the resources.
+
+##
+  - `custom_policy` - (Optionnal) A string map of custom policies parameters as defined below.
+  - `custom_policy_non_compliance_messages` - (Optionnal) Key-Value Map. Provide non compliance messages to policies requirying it Key is the policy name. Value should be the string message.
+  - `custom_policy_parameters` - (Optionnal) Key-Value Map. Provide parameters to policies requirying parameters. Key is the policy name. Value should be a JSON string of the policy parameters.
+  - `enable_azure_security_benchmark` - (Optionnal) Provide parameters to the implementation of the initiative 'Azure Security Benchmark' as defined below.
+  - `initiatives_parameters` - (Optionnal)  A custom map of initiatives parameters as defined below.
+
+##
+A `custom_policy` map support the following:
+  - `library_folder` - (Required) A folder path containing json files.
+
+##
+A `enable_azure_security_benchmark` object support the following:
+  - `exemption_reference_list` - (Optionnal) List of policies' reference ids in the initiatives that will be exempted. A exemption resource will be created.
+
+##
+A `initiatives_parameters` object support the following:
+  - `default_policies_non_compliant_message` - (Optionnal) Default policy non compliant message.
+  - `description` - (Optionnal) Initiative Description.
+  - `display_name_prefix` - (Optionnal) Initiative names prefix. Note that the category key will be appended at the end.
+  - `excluded_scopes` - (Optionnal) List of Management group, subscriptions, resource groups, resources scopes.
+  - `identity` - (Optionnal) . A custom map of identity parameters as defined below
+  - `identity_ids` - (Optionnal) . 
+
+##
+A `identity` map support the following:
+  - `type` - (Required) Possible values are `SystemAssigned` or `UserAssigned` .
+  - `identity_ids` - (Optionnal) List of Managed Identity IDs. Required when `type` is set to `UserAssigned`.
+
 
 ## Outputs
 

@@ -58,5 +58,28 @@ locals {
   # 4. Security Benchmark
   ##########################################################################
   azsecurity_name = "Azure Security Benchmark"
+
+  ##########################################################################
+  # 5. Guest Policies
+  ##########################################################################
+
+  azguestconfinit_name          = "Deploy prerequisites to enable Guest Configuration policies on virtual machines"
+  azguestconfinitaddtag-vm_name = "Add a tag to resources"
+  azguestconfplname             = "EnablePrivateNetworkGC"
+
+  added_policies = {
+    "${local.azguestconfplname}" = {
+      displayName                   = "${local.azguestconfinitaddtag-vm_name}",
+      name                          = "${local.azguestconfplname}",
+      policyDefinitionId            = azurerm_policy_definition.guestconf-addvmtag.id,
+      identity                      = false,
+      parameters                    = null,
+      require_non_compliance_mesage = true
+      non_compliance_message        = null
+    }
+  }
+  guest_configuration_enforced_policies_plus_addition = merge(var.guest_configuration_enforced_policies, local.added_policies)
+
+  guests_not_scopes = concat(var.excluded_scopes, var.guest_configuration_excluded_scopes)
 }
 
