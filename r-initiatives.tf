@@ -36,11 +36,12 @@ resource "azurerm_management_group_policy_assignment" "general-plcset-assign" {
   for_each = {
     for category in local.category_full_list : "${category}" => null
   }
-  name                 = "azgea-${each.key}"
+  name                 = "az-${each.key}"
   display_name         = "${var.initiatives_parameters.display_name_prefix} ${each.key}"
   policy_definition_id = azurerm_policy_set_definition.general-plcset-def[each.key].id
   management_group_id  = var.management_group_id
-  not_scopes           = var.initiatives_parameters.excluded_scopes
+  not_scopes           = var.initiatives_parameters.category_exclusive_parameters == null ? var.initiatives_parameters.excluded_scopes : lookup(var.initiatives_parameters.category_exclusive_parameters, "${each.key}", null) == null ? var.initiatives_parameters.excluded_scopes : (lookup(var.initiatives_parameters.category_exclusive_parameters, "${each.key}")).excluded_scopes
+  enforce              = var.initiatives_parameters.category_exclusive_parameters == null ? true : lookup(var.initiatives_parameters.category_exclusive_parameters, "${each.key}", null) == null ? true : (lookup(var.initiatives_parameters.category_exclusive_parameters, "${each.key}")).enforce
 
   dynamic "non_compliance_message" {
     for_each = {

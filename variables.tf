@@ -25,6 +25,10 @@ variable "initiatives_parameters" {
       type         = string
       identity_ids = list(string)
     })
+    category_exclusive_parameters = map(object({
+      enforce         = bool,
+      excluded_scopes = list(string)
+    }))
 
   })
   description = "Parameters for naming initiatives."
@@ -35,6 +39,7 @@ variable "initiatives_parameters" {
     default_policies_non_compliant_message = "Your deployment or action is not compliant with your organization policies. Please check the error for more details and/or contact your Azure admin."
     excluded_scopes                        = []
     identity                               = null
+    category_exclusive_parameters          = null
   }
 }
 
@@ -43,21 +48,18 @@ variable "initiatives_parameters" {
 ##########################################################################
 
 variable "custom_policy" {
-  type        = map(string)
+  type = object({
+    library_folder = string
+    policy_exclusive_parameters = map(object({
+      parameter_values       = string
+      non_compliance_message = string
+    }))
+  })
   description = "Map attributes for custom policies. \n library_folder: A library folder path which contains JSON policies to be loaded and added."
-  default     = {}
-}
-
-variable "custom_policy_parameters" {
-  type        = map(string)
-  description = "Map list of policy name and their parameters as values."
-  default     = {}
-}
-
-variable "custom_policy_non_compliance_messages" {
-  type        = map(string)
-  description = "Map list of policy name and their parameters as values."
-  default     = {}
+  default = {
+    library_folder              = "."
+    policy_exclusive_parameters = {}
+  }
 }
 
 ##########################################################################
@@ -72,30 +74,20 @@ variable "predefined_policies" {
     non_compliance_message = string
   }))
   description = "A list of policies to apply on the defined management group. This list will be enforced."
+  default     = {}
 }
 
 ##########################################################################
-# 4. Security Benchmark
+# 4. Predefined Initiatives Deployments
 ##########################################################################
 
-variable "enable_azure_security_benchmark" {
-  type = object({
-    exemption_reference_list = list(string)
-  })
-  description = "Enable the predefined 'Azure security Benchmark initiative'."
-  default     = null
-}
-
-##########################################################################
-# 5. Guest Policies
-##########################################################################
-variable "predefined_guest_policies" {
+variable "predefined_initiatives" {
   type = map(object({
-    display_name           = string
-    name                   = string
-    category               = string
-    parameters             = string
-    non_compliance_message = string
+    initiative_name          = string
+    exemption_reference_list = list(string)
   }))
-  description = "A list of policies to apply on the defined management group. This list will be enforced."
+  description = "Deploy initiatives based on the information sent."
+  default     = {}
 }
+
+

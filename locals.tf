@@ -28,8 +28,8 @@ locals {
       display_name           = policy.display_name,
       policy_definition_id   = policy.policy_definition_id
       category               = policy.category
-      parameters             = lookup(var.custom_policy_parameters, key, null)
-      non_compliance_message = lookup(var.custom_policy_non_compliance_messages, key, var.initiatives_parameters.default_policies_non_compliant_message)
+      parameters             = lookup(var.custom_policy.policy_exclusive_parameters, key, null) == null ? null : (lookup(var.custom_policy.policy_exclusive_parameters, key)).parameter_values
+      non_compliance_message = lookup(var.custom_policy.policy_exclusive_parameters, key, null) == null ? null : (lookup(var.custom_policy.policy_exclusive_parameters, key)).non_compliance_message
     }
   })
 
@@ -55,31 +55,7 @@ locals {
   })
 
   ##########################################################################
-  # 4. Security Benchmark
+  # 4. Predefined Initiatives Deployments
   ##########################################################################
-  azsecurity_name = "Azure Security Benchmark"
-
-  ##########################################################################
-  # 5. Guest Policies
-  ##########################################################################
-
-  azguestconfinit_name          = "Deploy prerequisites to enable Guest Configuration policies on virtual machines"
-  azguestconfinitaddtag-vm_name = "Add a tag to resources"
-  azguestconfplname             = "EnablePrivateNetworkGC"
-
-  added_policies = {
-    "${local.azguestconfplname}" = {
-      displayName                   = "${local.azguestconfinitaddtag-vm_name}",
-      name                          = "${local.azguestconfplname}",
-      policyDefinitionId            = azurerm_policy_definition.guestconf-addvmtag.id,
-      identity                      = false,
-      parameters                    = null,
-      require_non_compliance_mesage = true
-      non_compliance_message        = null
-    }
-  }
-  guest_configuration_enforced_policies_plus_addition = merge(var.guest_configuration_enforced_policies, local.added_policies)
-
-  guests_not_scopes = concat(var.excluded_scopes, var.guest_configuration_excluded_scopes)
 }
 
